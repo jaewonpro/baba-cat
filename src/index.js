@@ -10,6 +10,14 @@ x[f]=G;
 x[m](0,0,X,Y);
 x[f]=B;
 x[m](d,100,100,100);
+// https://developer.mozilla.org/en-US/docs/Web/API/Path2D/Path2D
+// https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorials/SVG_from_scratch/Paths
+// @google "walkikng cat animation"
+// https://www.instagram.com/shouxin13141
+// https://inkscape.org/
+let p = new Path2D(`M 200 200 h 90 v 90 h -90 Z`);
+x.fill(p);
+
 // TODO: create time object global that includes now, time since previous frame call, 
 
 },ra=_=>requestAnimationFrame(ra,fa(_,x.clearRect(0,0,w,h)));ra(0);
@@ -52,4 +60,3 @@ c.addEventListener('click', async () => {
 
 })();
 
-// 0   1   2   3   4   5   6   7   8   9   10  11

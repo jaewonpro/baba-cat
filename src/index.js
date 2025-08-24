@@ -1,22 +1,20 @@
 import { Player } from "./audio";
+import { Scene } from "./scene";
 
 (async _=>{
+let scene = new Scene();
 let [b,c,f,l,m,X,Y,B,G,H]=[document.body,document.querySelector(`canvas`),`fillStyle`,`length`,`fillRect`,1920,1080,`black`,`gray`,`white`],
 x=c.getContext(`2d`),w=c.width=b.clientWidth,h=c.height=b.clientHeight,fa=t=>{
 w=b.clientWidth,h=b.clientHeight;let [z,n]=[w*9>h*16,Date.now()];w=c.width=z?X/Y*h:w;h=c.height=z?h:Y/X*w;x.scale(w/X,h/Y);
 
-let d=Math.floor(n/1e3)%10/10*X;
-x[f]=G;
-x[m](0,0,X,Y);
-x[f]=B;
-x[m](d,100,100,100);
+scene._draw(x, t);
 // https://developer.mozilla.org/en-US/docs/Web/API/Path2D/Path2D
 // https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorials/SVG_from_scratch/Paths
 // @google "walkikng cat animation"
 // https://www.instagram.com/shouxin13141
 // https://inkscape.org/
-let p = new Path2D(`M 200 200 h 90 v 90 h -90 Z`);
-x.fill(p);
+// let p = new Path2D(`M 200 200 h 90 v 90 h -90 Z`);
+// x.fill(p);
 
 // TODO: create time object global that includes now, time since previous frame call, 
 

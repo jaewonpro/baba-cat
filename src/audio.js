@@ -1,7 +1,7 @@
 const ax = new AudioContext();
 /**
  * C C# D D# E F F# G G# A A# B
- * 0  1 2 3  4 5 6  7  8 9 10 11
+ * 0  1 2  3 4 5  6 7  8 9 10 11
  */
 const pitch2freq = (p) => Math.pow(2, Math.floor(p/12)-4) * [261.63, 277.18, 293.66, 311.13, 329.63, 349.23, 369.99, 392, 415.30, 440, 466.16, 493.88][p%12],
 waves = [`sine`, `square`, `sawtooth`, `triangle`],
@@ -54,13 +54,15 @@ export class Player {
     constructor() {}
 
     playScore(score, at) {
-        this.score = score;
-        this.state = [120];
-        this.timeIndice = [0,0,at??ax.currentTime,0];
-        clearInterval(this.loadLoop);
-        this.loadLoop = setInterval(_ => {
-            this.triggerScoreLoad();
-        }, 50);
+        ax.resume().then(_ => {
+            this.score = score;
+            this.state = [120];
+            this.timeIndice = [0,0,at??ax.currentTime,0];
+            clearInterval(this.loadLoop);
+            this.loadLoop = setInterval(_ => {
+                this.triggerScoreLoad();
+            }, 50);
+        });
     }
 
     get beattime() {return 60 / this.state[0]}
@@ -71,6 +73,7 @@ export class Player {
     // relative time after start of track on the `itemRead`'s beat 0
     triggerScoreLoad() {
         let endBeat = Math.max(ax.currentTime - this.timeIndice[2], 0) / this.beattime + this.state[0]/600;
+        // console.log(ax.currentTime, this.timeIndice[2], endBeat);
         let readUptoBeat = -1; 
         let item = this.score[this.timeIndice[0]];
         while (item) {
@@ -80,12 +83,12 @@ export class Player {
                 }
                 for (const [[sb,eb],i,p] of item) {// note: [[start-beat, end-beat], instrument, pitch]
                     if (sb >= this.timeIndice[1]) { // starting off where we didn't parse yet
-                        console.log(`schedule ready`, sb, `<`, endBeat);
+                        // console.log(`schedule ready`, sb, `<`, endBeat);
                         if (sb < endBeat) {
                             if (Array.isArray(i)) 
                                 for (const ii of i) this.scheduleInstrument(this.timeIndice[2], sb,eb,ii,p);
                             else this.scheduleInstrument(this.timeIndice[2], sb,eb,i,p);
-                            console.log(`scheduled a note`, this.timeIndice[1], sb, endBeat, ax.currentTime, this.timeIndice[2]);
+                            // console.log(`scheduled a note`, this.timeIndice[1], sb, endBeat, ax.currentTime, this.timeIndice[2]);
                         } else {
                             readUptoBeat = sb;
                             break;

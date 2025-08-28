@@ -11,11 +11,32 @@ let mod = (f,l,v) => n => v(Math.min(1,(n-f)/l)),
     rand=Math.random,
     abs = Math.abs,
     p = s=> new Path2D(s);
+    
 
 
 
 export class Logic {
-
+    move = [0,0];
+    pos = [0,0];
+    constructor() {
+        let r = (n)=>document.body.addEventListener(n,e => this._onEvent(e));
+        r(`keydown`);
+        r(`keyup`);
+    }
+    _onEvent({code,type}) {
+        if (type == `kekydown`) {
+            if (code == `keyW`) this.move[1] = 1;
+            if (code == `keyA`) this.move[0] = -1;
+            if (code == `keyS`) this.move[1] = -1;
+            if (code == `keyD`) this.move[0] = 1;
+            return;
+        } 
+        if (code == `keyA` || code == `keyD`) this.move[0] = 0;
+        if (code == `keyW` || code == `keyS`) this.move[1] = 0;
+    }
+    update() {
+        // TODO: process position, game events
+    }
 }
 
 // hard coded 4e3 and 2e3. a block in ground is supposed to be 3840 wide and should trigger update on half way out
@@ -32,32 +53,38 @@ class Ground {
     // ┌        ┐       └       ┘
     // rd       ld      ru      lu
     blocks = [[], [], [], []];
-    pos = [0,0];
     constructor() {
         window.g = this;
-        // randomly generate 
-        for (let i=-1;++i<4;) {
-            let qb = this._newBlock(i);
-            this.blocks[i].push(...qb);
-        }
+        
+        this.center = [8e3,8e3];
+        this._posUpdate(0,0);
     }
 
     update(x, px, py) {
         this._posUpdate(px, py);
         x.fillStyle = `#FFAE13`;
         let [bx, by] = this.center;
+
+        // TODO: CAMERA SYSTEM, smooth the camera
+        x.translate(px, py);
+
         x.fillRect(bx-4e3,by-4e3,8e3,8e3);
-        for (const [c,pa] of this.blocks.flat(1)) {
+        // WARN: performance very bad.
+        for (const [c,pa] of this.blocks.flat(1)) { 
             x.fillStyle=c;
             x.fill(p(pa));
         }
+
+        x.translate(-px, -py);
     }
 
+    // if new position leave the half of unit, 
+    // update center
+    // reuse blocks or create new
     _posUpdate(x,y) {
         let [xd,yd] = [x-this.center[0], y-this.center[1]],
             [ax,ay] = [abs(xd), abs(yd)];
 
-        // TODO: update current center
         this.center = [Math.round(x/4e3)*4e3, Math.round(y/4e3)*4e3];
         if (ax>4e3||ay>4e3) 
             return this.blocks = [this._newBlock(0), this._newBlock(1),this._newBlock(2), this._newBlock(3)];
@@ -72,9 +99,6 @@ class Ground {
                 [this._newBlock(0), this._newBlock(1), this.blocks[0], this.blocks[1]] : 
                 [this.blocks[2], this.blocks[3], this._newBlock(2), this._newBlock(3)];
         }
-        // if new position leave the half of unit, 
-        // update center
-        // reuse blocks or create new
     }
 
     _newBlock(tileIndex) {
@@ -90,6 +114,7 @@ class Ground {
 
 export class Scene {
     ground = new Ground();
+    logic = new Logic();
     screenShakerMod = [0, ()=>0];
 
     // coins, cat, road
@@ -101,7 +126,6 @@ export class Scene {
  * sceneIndex = 0: main, 1: gacha, 2: gaming
  */
     state = [0, 0];
-
 
     _draw(x) {//: CanvasRenderingContext2D
         let [now, t] = clock;
